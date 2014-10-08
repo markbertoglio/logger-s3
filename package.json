@@ -1,22 +1,22 @@
 {
-  "name": "awslogger",
+  "name": "logger-s3",
   "version": "0.0.0",
-  "description": "Generate log files in AWS",
-  "main": "awslogger.js",
+  "description": "Generate log files in S3",
+  "main": "logger-s3.js",
   "directories": {
   },
   "scripts": {
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/markbertoglio/awslogger.git"
+    "url": "https://github.com/markbertoglio/logger-s3.git"
   },
   "author": "Mark Bertoglio",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/markbertoglio/awslogger/issues"
+    "url": "https://github.com/markbertoglio/logger-s3/issues"
   },
-  "homepage": "https://github.com/markbertoglio/awslogger",
+  "homepage": "https://github.com/markbertoglio/logger-s3",
   "dependencies": {
     "knox" : "0.8.6"
   }
