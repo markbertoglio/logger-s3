@@ -1,0 +1,23 @@
+{
+  "name": "awslogger",
+  "version": "0.0.0",
+  "description": "Generate log files in AWS",
+  "main": "awslogger.js",
+  "directories": {
+  },
+  "scripts": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/markbertoglio/awslogger.git"
+  },
+  "author": "Mark Bertoglio",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/markbertoglio/awslogger/issues"
+  },
+  "homepage": "https://github.com/markbertoglio/awslogger",
+  "dependencies": {
+    "knox" : "0.8.6"
+  }
+}
