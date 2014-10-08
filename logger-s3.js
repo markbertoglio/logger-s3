@@ -36,38 +36,37 @@ function writeLog(logData, done) {
   });
   flushQueue(false);
   return done && done();
-
-  function flushQueue(force) {
-    if ((logQueue.length > maxEntries || force) && !writing && logQueue.length) {
-      writing = true;
-      return writeQueue(function(err) {
-        writing = false;
-      });
-    }
-
-    function writeQueue(queue, done) {
-      var file = awsPath + Date.now() + fileSuffix;
-      var data = JSON.stringify(logQueue);
-      logQueue = [];
-      var headers = {
-        'Content-Length': data.length,
-        'Content-Type': 'application/json',
-      };
-      var req = client.put(file, headers);
-      req.on('response', function(res) {
-        res.setEncoding('utf8');
-        res.on('data', function(chunk) {
-          // console.error(chunk);
-        });
-        if (res.statusCode != 200) console.error("Failed to write to AWS, status", res.statusCode);
-        done();
-      });
-      req.on('error', function(err) {
-        done(err);
-      });
-      req.end(data);
-    }
-  }
 }
 
+function flushQueue(force) {
+  if ((logQueue.length > maxEntries || force) && !writing && logQueue.length) {
+    writing = true;
+    return writeQueue(function(err) {
+      writing = false;
+    });
+  }
+
+  function writeQueue(done) {
+    var file = awsPath + Date.now() + fileSuffix;
+    var data = JSON.stringify(logQueue);
+    logQueue = [];
+    var headers = {
+      'Content-Length': data.length,
+      'Content-Type': 'application/json',
+    };
+    var req = client.put(file, headers);
+    req.on('response', function(res) {
+      res.setEncoding('utf8');
+      res.on('data', function(chunk) {
+        // console.error(chunk);
+      });
+      if (res.statusCode != 200) console.error("Failed to write to AWS, status", res.statusCode);
+      done();
+    });
+    req.on('error', function(err) {
+      done(err);
+    });
+    req.end(data);
+  }
+}
 
