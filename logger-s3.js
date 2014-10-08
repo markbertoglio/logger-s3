@@ -1,7 +1,7 @@
 var knox = require('knox');
 
 module.exports = {
-  init: init
+  init: init,
   writeLog: writeLog
 };
 
