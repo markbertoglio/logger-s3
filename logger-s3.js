@@ -7,8 +7,7 @@ module.exports = {
 
 var awsPath;
 var maxEntries;
-var logQueue = [];
-var writing = false;
+var publicLogs = false;
 var fileSuffix = '_' + (Math.floor(Math.random() * 1000000000)).toString(36) + '.json';
 var client;
 
@@ -22,51 +21,30 @@ function init(config) {
   maxEntries = config && config.maxEntriesPerFile || 500;
   awsPath = config && config.awsPath || process.env.AWS_LOG_PATH;
   if (awsPath[awsPath.length-1] != '/') awsPath += '/';
+  publicLogs = config && config.publicLogs || false;
   client = knox.createClient(knoxConfig);
-  setInterval(flushQueue, config.flushTime || 10000, true);
-  return writeLog;
 }
 
-function writeLog(logData, done) {
-  var now = Date.now();
-  var timeDiff = (logData.date || now) - now;
-  (logData.logs || []).forEach(function(logEntry) {
-    logEntry.date = (logEntry.date || now) - timeDiff;
-    logQueue.push(logEntry);
+function writeLog(logs, done) {
+  var file = awsPath + Date.now() + fileSuffix;
+  var data = JSON.stringify(logs);
+  var headers = {
+    'Content-Length': data.length,
+    'Content-Type': 'application/json',
+  };
+  if (publicLogs) headers['x-amz-acl'] = 'public-read';
+  var req = client.put(file, headers);
+  req.on('response', function(res) {
+    res.setEncoding('utf8');
+    res.on('data', function(chunk) {
+      // console.error(chunk);
+    });
+    var err = null;
+    if (res.statusCode != 200) err = "Failed to write to AWS, status" + res.statusCode;
+    done(err);
   });
-  flushQueue(false);
-  return done && done();
+  req.on('error', function(err) {
+    done(err);
+  });
+  req.end(data);
 }
-
-function flushQueue(force) {
-  if ((logQueue.length > maxEntries || force) && !writing && logQueue.length) {
-    writing = true;
-    return writeQueue(function(err) {
-      writing = false;
-    });
-  }
-
-  function writeQueue(done) {
-    var file = awsPath + Date.now() + fileSuffix;
-    var data = JSON.stringify(logQueue);
-    logQueue = [];
-    var headers = {
-      'Content-Length': data.length,
-      'Content-Type': 'application/json',
-    };
-    var req = client.put(file, headers);
-    req.on('response', function(res) {
-      res.setEncoding('utf8');
-      res.on('data', function(chunk) {
-        // console.error(chunk);
-      });
-      if (res.statusCode != 200) console.error("Failed to write to AWS, status", res.statusCode);
-      done();
-    });
-    req.on('error', function(err) {
-      done(err);
-    });
-    req.end(data);
-  }
-}
-
